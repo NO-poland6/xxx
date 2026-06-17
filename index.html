@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agra PSK · Generator etykiet roślin</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+html,body{margin:0;padding:0;}
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap');
+
+.app, .app * { box-sizing: border-box; }
+.app {
+  --ink:#15241A; --forest:#1E3A28; --forest-2:#274A33;
+  --paper:#F5EFE1; --paper-2:#EBE2CE; --paper-line:rgba(21,36,26,.14);
+  --brass:#A9842E; --brass-l:#CDA24A; --sage:#6E8B6A; --leaf:#8BC34A;
+  font-family:'Inter',system-ui,sans-serif;
+  min-height:100vh; color:#E7EDE6;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(105,139,106,.18), transparent 60%),
+    linear-gradient(160deg,#13211A 0%,#0E1813 100%);
+  padding:28px 20px 64px;
+}
+.wrap { max-width:1040px; margin:0 auto; }
+
+/* top bar */
+.top { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:26px; flex-wrap:wrap; }
+.brand { display:flex; align-items:center; gap:13px; }
+.brand .mark {
+  width:46px; height:46px; border-radius:12px; display:grid; place-items:center;
+  background:linear-gradient(150deg,var(--forest-2),var(--forest));
+  border:1px solid rgba(139,195,74,.4);
+}
+.brand .mark img { width:32px; height:32px; object-fit:contain; }
+.brand .wm { font-family:'Fraunces',serif; font-weight:600; font-size:22px; letter-spacing:.3px; color:#F4EFE2; line-height:1; }
+.brand .sub { font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:#8FA890; margin-top:4px; }
+
+.actions { display:flex; gap:10px; flex-wrap:wrap; }
+.btn {
+  font-family:'Inter',sans-serif; font-size:13.5px; font-weight:500; cursor:pointer;
+  border-radius:10px; padding:10px 15px; display:inline-flex; align-items:center; gap:8px;
+  border:1px solid rgba(231,237,230,.16); background:rgba(255,255,255,.04); color:#E7EDE6;
+  transition:.15s;
+}
+.btn:hover { background:rgba(255,255,255,.09); border-color:rgba(231,237,230,.3); }
+.btn:disabled { opacity:.45; cursor:not-allowed; }
+.btn.primary {
+  background:linear-gradient(150deg,var(--brass-l),var(--brass)); color:#1c1505;
+  border-color:transparent; font-weight:600;
+}
+.btn.primary:hover { filter:brightness(1.06); }
+
+/* ── the plant card (the deliverable) — ZAWSZE POZIOMO ── */
+.stage { display:grid; place-items:center; }
+.card {
+  width:100%; max-width:1000px; aspect-ratio:1.5/1; min-width:0;
+  background:var(--paper); color:var(--ink); border-radius:14px; overflow:hidden;
+  box-shadow:0 30px 60px -24px rgba(0,0,0,.6), 0 2px 0 rgba(255,255,255,.04) inset;
+  display:flex; flex-direction:column; position:relative;
+}
+.card-head {
+  background:linear-gradient(95deg,var(--forest) 0%,var(--forest-2) 100%);
+  color:#F2EDDE; padding:13px 26px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:2px solid var(--brass);
+}
+.card-head .l { display:flex; align-items:center; gap:12px; }
+.card-head .leaf { width:34px; height:34px; border-radius:9px; display:grid; place-items:center;
+  background:#F3EEDF; }
+.card-head .leaf img { width:26px; height:26px; object-fit:contain; }
+.card-head .name { font-family:'Fraunces',serif; font-weight:600; font-size:19px; letter-spacing:.4px; }
+.card-head .eyebrow { font-size:9.5px; letter-spacing:3px; text-transform:uppercase; color:#A9C0A8; margin-top:2px; }
+.card-head .r { text-align:right; font-size:10px; letter-spacing:.5px; color:#BFD2BD; line-height:1.5; }
+
+.card-body { flex:1; display:grid; grid-template-columns:1.32fr 1fr; }
+
+/* left: opis + cena */
+.left { padding:20px 24px 18px; display:flex; flex-direction:column; }
+.pl-name { font-family:'Fraunces',serif; font-weight:600; font-size:clamp(20px,3vw,30px); line-height:1.04; color:var(--ink); }
+.lat-name { font-family:'Fraunces',serif; font-style:italic; font-weight:400; font-size:clamp(12px,1.7vw,16px); color:var(--brass); margin-top:3px; }
+.intro { font-size:clamp(11px,1.3vw,12.5px); line-height:1.5; color:#33473A; margin-top:11px; }
+
+.care { margin-top:auto; padding-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:9px 16px; }
+.care-row { display:flex; gap:10px; align-items:flex-start; }
+.care-ic { width:26px; height:26px; flex:none; border-radius:7px; display:grid; place-items:center;
+  background:var(--paper-2); color:var(--sage); border:1px solid var(--paper-line); }
+.care-k { font-size:9px; letter-spacing:1.6px; text-transform:uppercase; color:#7E8E7B; }
+.care-v { font-size:clamp(10.5px,1.2vw,12px); font-weight:500; color:#2A3B2F; line-height:1.25; }
+
+.price-tag { margin-top:12px; display:flex; align-items:center; justify-content:space-between;
+  background:var(--ink); color:#F3EEDF; border-radius:11px; padding:11px 16px; }
+.price-tag .cap { font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:#9FB39C; }
+.price-tag .val { font-family:'Fraunces',serif; font-weight:600; }
+.price-tag .num { font-size:clamp(20px,2.6vw,28px); line-height:1; }
+.price-tag .cur { font-size:15px; color:var(--brass-l); margin-left:5px; }
+
+/* right: zdjęcie */
+.right { position:relative; background:var(--paper-2); border-left:1px solid var(--paper-line); overflow:hidden; }
+.photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.photo-empty { position:absolute; inset:0; display:flex; flex-direction:column; gap:9px;
+  align-items:center; justify-content:center; color:#8a8568; cursor:pointer;
+  border:2px dashed rgba(21,36,26,.18); margin:14px; border-radius:11px; text-align:center; padding:14px; }
+.photo-empty:hover { color:var(--brass); border-color:var(--brass); }
+.photo-loading { position:absolute; inset:0; display:flex; flex-direction:column; gap:11px;
+  align-items:center; justify-content:center; color:#5d7359;
+  background:repeating-linear-gradient(135deg,#EBE2CE,#EBE2CE 12px,#E4DAC2 12px,#E4DAC2 24px); }
+.photo-tools { position:absolute; right:12px; bottom:12px; display:flex; gap:7px; flex-wrap:wrap; justify-content:flex-end; max-width:80%; }
+.photo-tools button { cursor:pointer; background:rgba(21,36,26,.78); color:#F3EEDF; border:none;
+  border-radius:9px; padding:8px 11px; font-size:12px; display:flex; align-items:center; gap:7px; backdrop-filter:blur(2px); }
+.photo-tools button:hover { background:rgba(21,36,26,.95); }
+.photo-credit { position:absolute; left:10px; bottom:10px; font-size:9px; letter-spacing:.4px;
+  color:#fff; background:rgba(21,36,26,.55); padding:3px 7px; border-radius:6px; }
+
+.card-foot { background:var(--paper-2); border-top:1px solid var(--paper-line);
+  padding:8px 26px; display:flex; align-items:center; justify-content:space-between; gap:16px;
+  font-size:10px; letter-spacing:.4px; color:#7E8E7B; }
+.card-foot .tag { font-style:italic; white-space:nowrap; }
+.card-foot .care-note { text-align:right; }
+
+[contenteditable]:focus { outline:2px solid var(--brass-l); outline-offset:2px; border-radius:4px; }
+
+/* start state */
+.start { text-align:center; padding:60px 24px; }
+.start .big { font-family:'Fraunces',serif; font-size:30px; color:#F3EEE2; font-weight:600; }
+.start p { color:#9FB39C; max-width:440px; margin:12px auto 26px; line-height:1.6; font-size:14.5px; }
+
+.hint { text-align:center; color:#7E9079; font-size:12px; margin-top:14px; display:flex;
+  gap:7px; align-items:center; justify-content:center; }
+
+/* modal */
+.scrim { position:fixed; inset:0; background:rgba(8,14,10,.62); backdrop-filter:blur(3px);
+  display:grid; place-items:center; padding:20px; z-index:50; }
+.modal { width:100%; max-width:440px; background:var(--paper); color:var(--ink);
+  border-radius:16px; overflow:hidden; box-shadow:0 24px 60px -16px rgba(0,0,0,.7); }
+.modal-head { background:linear-gradient(95deg,var(--forest),var(--forest-2)); color:#F2EDDE;
+  padding:16px 20px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:2px solid var(--brass); }
+.modal-head h3 { font-family:'Fraunces',serif; font-weight:600; font-size:18px; margin:0; }
+.modal-head .x { cursor:pointer; color:#C6D6C4; background:none; border:none; padding:4px; display:grid; place-items:center; border-radius:6px; }
+.modal-head .x:hover { background:rgba(255,255,255,.12); color:#fff; }
+.modal-body { padding:20px; }
+.modal-body label { display:block; font-size:11px; letter-spacing:1.6px; text-transform:uppercase; color:#7E8E7B; margin-bottom:8px; }
+.field { width:100%; font-family:'Inter',sans-serif; font-size:15px; color:var(--ink);
+  background:#fff; border:1px solid var(--paper-line); border-radius:10px; padding:12px 14px; }
+.field:focus { outline:2px solid var(--brass-l); outline-offset:1px; border-color:var(--brass); }
+.price-row { display:flex; gap:10px; align-items:stretch; }
+.price-row .cur { display:grid; place-items:center; padding:0 16px; background:var(--ink);
+  color:var(--brass-l); border-radius:10px; font-family:'Fraunces',serif; font-size:16px; }
+.modal-note { font-size:12px; color:#7E8E7B; margin-top:12px; line-height:1.5; }
+.modal-foot { padding:14px 20px 18px; display:flex; gap:10px; justify-content:flex-end; background:var(--paper-2); border-top:1px solid var(--paper-line); }
+.modal .btn { color:var(--ink); border-color:var(--paper-line); background:#fff; }
+.modal .btn:hover { background:#fff; border-color:var(--brass); }
+.modal .btn.primary { color:#1c1505; background:linear-gradient(150deg,var(--brass-l),var(--brass)); border-color:transparent; }
+.err { background:#fbeaea; color:#8a2b2b; border:1px solid #e7c4c4; border-radius:9px; padding:10px 12px; font-size:13px; margin-top:12px; }
+.spin { animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* print: tylko karta, poziomo */
+@media print {
+  @page { size:A4 landscape; margin:12mm; }
+  body { background:#fff; }
+  .app { background:#fff!important; padding:0; }
+  .no-print { display:none!important; }
+  .stage { display:block; }
+  .card { box-shadow:none; max-width:100%; border:1px solid #ccc; aspect-ratio:1.5/1; }
+}
+
+
+/* dodatki dla wersji standalone */
+.settings-field{margin-bottom:14px;}
+.settings-field:last-child{margin-bottom:0;}
+.warn{background:#fff6e6;color:#7a5a16;border:1px solid #e6d3a6;border-radius:9px;padding:10px 12px;font-size:12px;line-height:1.5;margin-top:4px;}
+.or{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7E8E7B;text-align:center;margin:10px 0;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useRef } = React;
+
+const LOGO = "data:image/png;base64,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";
+
+/* ── ikony (inline SVG, bez bibliotek) ── */
+const Svg = ({size=16, className, children}) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>
+);
+const Sun = (p)=><Svg {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></Svg>;
+const Droplets = (p)=><Svg {...p}><path d="M12 2.5s6 5.7 6 10.5a6 6 0 0 1-12 0c0-4.8 6-10.5 6-10.5z"/></Svg>;
+const Snowflake = (p)=><Svg {...p}><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/></Svg>;
+const Ruler = (p)=><Svg {...p}><path d="M3 17 17 3l4 4L7 21z"/><path d="M7.5 12.5l2 2M10.5 9.5l2 2M13.5 6.5l2 2"/></Svg>;
+const Sparkles = (p)=><Svg {...p}><path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/><path d="M19 14l.6 1.6L21 16l-1.4.6L19 18l-.6-1.4L17 16l1.4-.4z"/></Svg>;
+const Printer = (p)=><Svg {...p}><path d="M6 9V3h12v6"/><path d="M6 17H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><rect x="6" y="13" width="12" height="8" rx="1"/></Svg>;
+const ImagePlus = (p)=><Svg {...p}><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M3 14l4-4 3 3"/><circle cx="8" cy="8" r="1.4"/><path d="M19 13v6M22 16h-6"/></Svg>;
+const Pencil = (p)=><Svg {...p}><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></Svg>;
+const X = (p)=><Svg {...p}><path d="M6 6l12 12M18 6L6 18"/></Svg>;
+const ArrowRight = (p)=><Svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></Svg>;
+const Wand = (p)=><Svg {...p}><path d="M4 20L15 9"/><path d="M13 7l4 4"/><path d="M18 3l.6 1.6L20 5l-1.4.6L18 7l-.6-1.4L16 5l1.4-.6z"/></Svg>;
+const Globe = (p)=><Svg {...p}><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></Svg>;
+const Cog = (p)=><Svg {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.6 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.6H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8 1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></Svg>;
+const Loader = (p)=><Svg {...p} className="spin"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></Svg>;
+
+const PROMPT = (name) => `Jesteś doświadczonym ogrodnikiem przygotowującym ujednolicone etykiety roślin dla centrum ogrodniczego "Agra PSK" w Kłodzku.
+Na podstawie nazwy rośliny przygotuj zwięzły, rzetelny i poprawny merytorycznie opis na etykietę sprzedażową.
+Zwróć WYŁĄCZNIE obiekt JSON (bez komentarzy, bez znaczników), dokładnie wg schematu:
+{
+ "namePl": "polska nazwa zwyczajowa",
+ "nameLat": "nazwa łacińska (rodzaj i gatunek)",
+ "intro": "maks. 2 krótkie zdania, łącznie do 25 słów, rzeczowe i zachęcające",
+ "light": "wymagania świetlne, maks. 4 słowa",
+ "water": "podlewanie, maks. 4 słowa",
+ "frost": "mrozoodporność lub strefa, maks. 4 słowa",
+ "height": "docelowa wysokość, maks. 4 słowa",
+ "care": "jedna krótka wskazówka, maks. 12 słów; jeśli roślina jest trująca dla ludzi lub zwierząt — koniecznie to zaznacz"
+}
+Roślina podana przez sprzedawcę: "${name}"
+Pisz po polsku.`;
+
+/* ── zdjęcie z internetu (Wikipedia, CORS przez origin=*) ── */
+async function wikiImage(query, lang) {
+  const params = new URLSearchParams({
+    action:"query", format:"json", generator:"search",
+    gsrsearch:query, gsrlimit:"1", prop:"pageimages",
+    piprop:"thumbnail", pithumbsize:"1000", redirects:"1", origin:"*",
+  });
+  const r = await fetch(`https://${lang}.wikipedia.org/w/api.php?${params}`);
+  const j = await r.json();
+  const pages = j && j.query && j.query.pages;
+  if (!pages) return null;
+  const first = Object.values(pages).sort((a,b)=>(a.index||0)-(b.index||0))[0];
+  return (first && first.thumbnail && first.thumbnail.source) || null;
+}
+async function findImage(d, raw) {
+  const tries = [[d.nameLat,"pl"],[d.namePl,"pl"],[d.nameLat,"en"],[raw,"pl"],[d.namePl,"en"]].filter(t=>t[0]);
+  for (const [q,l] of tries) { try { const u = await wikiImage(q,l); if (u) return u; } catch(e){} }
+  return null;
+}
+/* ── generowane zdjęcie AI (Pollinations, bez klucza) ── */
+function aiImageUrl(d, raw) {
+  const subject = [d&&d.namePl, d&&d.nameLat].filter(Boolean).join(", ") || raw || "roślina";
+  const prompt = `realistic photograph of ${subject}, whole plant, natural daylight, garden center product photo, sharp focus, high detail, no text, no watermark`;
+  const seed = Math.floor(Math.random()*100000);
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=900&height=720&nologo=true&seed=${seed}`;
+}
+
+function extractPlant(data){
+  if (data && typeof data==="object" && data.namePl) return data;
+  let text="";
+  if (data && data.content) text = data.content.map(b=>b.text||"").join("");
+  else text = (data && (data.text||data.completion)) || (typeof data==="string"?data:JSON.stringify(data));
+  return JSON.parse(text.replace(/```json|```/g,"").trim());
+}
+
+function Modal({ title, children, onClose }) {
+  return (
+    <div className="scrim no-print" onMouseDown={onClose}>
+      <div className="modal" onMouseDown={(e)=>e.stopPropagation()}>
+        <div className="modal-head"><h3>{title}</h3>
+          <button className="x" onClick={onClose}><X size={18}/></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const CARE = [
+  { key:"light", label:"Stanowisko", Icon:Sun },
+  { key:"water", label:"Podlewanie", Icon:Droplets },
+  { key:"frost", label:"Mrozoodporność", Icon:Snowflake },
+  { key:"height", label:"Wysokość", Icon:Ruler },
+];
+
+const load = (k,d)=>{ try { const v=localStorage.getItem(k); return v===null?d:v; } catch(e){ return d; } };
+
+function App() {
+  const [modal, setModal] = useState("name");
+  const [nameInput, setNameInput] = useState("");
+  const [priceInput, setPriceInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [data, setData] = useState(null);
+  const [price, setPrice] = useState("");
+  const [photo, setPhoto] = useState(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [photoSource, setPhotoSource] = useState(null);
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const [genId, setGenId] = useState(0);
+  const [proxyUrl, setProxyUrl] = useState(()=>load("apsk_proxy","/api/generate"));
+  const [apiKey, setApiKey] = useState(()=>load("apsk_key",""));
+  const [pInput, setPInput] = useState("");
+  const [kInput, setKInput] = useState("");
+  const fileRef = useRef(null);
+
+  const edit = (k,v) => setData(d => ({ ...d, [k]: v }));
+
+  async function loadWeb(d, raw) {
+    setPhotoFailed(false); setPhotoLoading(true); setPhotoSource("web");
+    const url = await findImage(d, raw);
+    if (url) setPhoto(url);
+    else { setPhoto(null); setPhotoLoading(false); setPhotoFailed(true); }
+  }
+  function genAI(d, raw) {
+    setPhotoFailed(false); setPhotoLoading(true); setPhotoSource("ai");
+    setPhoto(aiImageUrl(d, raw));
+  }
+
+  function openBlank(name){
+    const blank = {namePl:name, nameLat:"", intro:"", light:"", water:"", frost:"", height:"", care:""};
+    setData(blank); setGenId(n=>n+1); setPhoto(null); loadWeb(blank, name);
+    setModal(price ? null : "price");
+  }
+
+  async function generate() {
+    const name = nameInput.trim();
+    if (!name) { setError("Wpisz nazwę rośliny."); return; }
+    if (!proxyUrl && !apiKey) { openBlank(name); return; } // brak konfiguracji → pusta etykieta
+    setLoading(true); setError("");
+    try {
+      let parsed;
+      if (proxyUrl) {
+        const res = await fetch(proxyUrl, { method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ name, prompt: PROMPT(name) }) });
+        parsed = extractPlant(await res.json());
+      } else {
+        const res = await fetch("https://api.anthropic.com/v1/messages", { method:"POST",
+          headers:{ "Content-Type":"application/json", "x-api-key":apiKey,
+                    "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
+          body: JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000,
+                                 messages:[{role:"user", content:PROMPT(name)}] }) });
+        parsed = extractPlant(await res.json());
+      }
+      setData(parsed); setGenId(n=>n+1); setPhoto(null); loadWeb(parsed, name);
+      setModal(price ? null : "price");
+    } catch(e) {
+      setError("Nie udało się wygenerować opisu. Sprawdź ustawienia (proxy/klucz) lub uściślij nazwę rośliny.");
+    } finally { setLoading(false); }
+  }
+
+  function savePrice(){ setPrice(priceInput.trim()); setModal(null); }
+  function openSettings(){ setPInput(proxyUrl); setKInput(apiKey); setModal("settings"); }
+  function saveSettings(){
+    const p=pInput.trim(), k=kInput.trim();
+    setProxyUrl(p); setApiKey(k);
+    try{ localStorage.setItem("apsk_proxy",p); localStorage.setItem("apsk_key",k); }catch(e){}
+    setModal(data ? null : "name");
+  }
+  function onFile(e){
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { setPhoto(r.result); setPhotoSource("upload"); setPhotoLoading(false); setPhotoFailed(false); };
+    r.readAsDataURL(f);
+  }
+
+  const hasCreds = !!(proxyUrl || apiKey);
+
+  return (
+    <div className="app">
+      <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{display:"none"}} />
+      <div className="wrap">
+        <div className="top no-print">
+          <div className="brand">
+            <div className="mark"><img src={LOGO} alt="Agra PSK" /></div>
+            <div><div className="wm">Agra PSK</div><div className="sub">Generator etykiet roślin</div></div>
+          </div>
+          <div className="actions">
+            {data && <>
+              <button className="btn" onClick={()=>{ setNameInput(""); setModal("name"); }}><Sparkles size={15}/> Zmień roślinę</button>
+              <button className="btn" onClick={()=>{ setPriceInput(price); setModal("price"); }}><Pencil size={15}/> Cena</button>
+              <button className="btn primary" onClick={()=>window.print()}><Printer size={15}/> Drukuj / PDF</button>
+            </>}
+            <button className="btn" onClick={openSettings} title="Ustawienia generowania opisu"><Cog size={15}/></button>
+          </div>
+        </div>
+
+        {!data && !modal && (
+          <div className="start no-print">
+            <div className="big">Ujednolicone opisy roślin</div>
+            <p>Wpisz nazwę rośliny, a aplikacja przygotuje gotową, poziomą etykietę w stylu Agra PSK —
+               z opisem, ceną i automatycznie pobranym zdjęciem.</p>
+            <button className="btn primary" onClick={()=>setModal("name")}><Sparkles size={16}/> Nowy opis rośliny</button>
+          </div>
+        )}
+
+        {data && (<>
+          <div className="stage">
+            <div className="card print-area" key={genId}>
+              <div className="card-head">
+                <div className="l">
+                  <div className="leaf"><img src={LOGO} alt="Agra PSK"/></div>
+                  <div><div className="name">Agra PSK</div><div className="eyebrow">Centrum Ogrodnicze · Kłodzko</div></div>
+                </div>
+                <div className="r">od 1991 · Kotlina Kłodzka<br/>naszogrodniczy.pl</div>
+              </div>
+
+              <div className="card-body">
+                <div className="left">
+                  <div className="pl-name" contentEditable suppressContentEditableWarning
+                       onBlur={(e)=>edit("namePl", e.currentTarget.textContent)}>{data.namePl}</div>
+                  <div className="lat-name" contentEditable suppressContentEditableWarning
+                       onBlur={(e)=>edit("nameLat", e.currentTarget.textContent)}>{data.nameLat}</div>
+                  <div className="intro" contentEditable suppressContentEditableWarning
+                       onBlur={(e)=>edit("intro", e.currentTarget.textContent)}>{data.intro}</div>
+
+                  <div className="care">
+                    {CARE.map(({key,label,Icon})=>(
+                      <div className="care-row" key={key}>
+                        <div className="care-ic"><Icon size={15}/></div>
+                        <div>
+                          <div className="care-k">{label}</div>
+                          <div className="care-v" contentEditable suppressContentEditableWarning
+                               onBlur={(e)=>edit(key, e.currentTarget.textContent)}>{data[key]}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="price-tag">
+                    <span className="cap">Cena</span>
+                    <span className="val">
+                      <span className="num" contentEditable suppressContentEditableWarning
+                            onBlur={(e)=>setPrice(e.currentTarget.textContent)}>{price || "—"}</span>
+                      <span className="cur">zł</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="right">
+                  {photo && (
+                    <img className="photo" src={photo} alt={data.namePl}
+                         onLoad={()=>setPhotoLoading(false)}
+                         onError={()=>{ setPhoto(null); setPhotoLoading(false); setPhotoFailed(true); }} />
+                  )}
+                  {photoLoading && (
+                    <div className="photo-loading">
+                      <Loader size={26}/>
+                      <div style={{fontSize:12.5,fontWeight:500}}>
+                        {photoSource==="ai" ? "Generuję zdjęcie AI…" : "Szukam zdjęcia rośliny…"}
+                      </div>
+                    </div>
+                  )}
+                  {!photo && !photoLoading && (
+                    <div className="photo-empty" onClick={()=>fileRef.current && fileRef.current.click()}>
+                      <ImagePlus size={30}/>
+                      <div style={{fontSize:13,fontWeight:500}}>{photoFailed ? "Nie udało się pobrać ani wygenerować" : "Brak zdjęcia"}</div>
+                      <div style={{fontSize:11}}>użyj przycisków poniżej lub kliknij, aby wgrać</div>
+                    </div>
+                  )}
+                  {photo && !photoLoading && photoSource!=="upload" && (
+                    <div className="photo-credit">{photoSource==="ai" ? "zdjęcie wygenerowane AI" : "źródło: Wikimedia"}</div>
+                  )}
+                  <div className="photo-tools no-print">
+                    <button onClick={()=>loadWeb(data, nameInput||data.namePl)} title="Pobierz prawdziwe zdjęcie z sieci"><Globe size={14}/> Sieć</button>
+                    <button onClick={()=>genAI(data, nameInput||data.namePl)} title="Wygeneruj zdjęcie AI"><Wand size={14}/> Generuj AI</button>
+                    <button onClick={()=>fileRef.current && fileRef.current.click()} title="Wgraj własne zdjęcie"><ImagePlus size={14}/> Wgraj</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-foot">
+                <span className="tag">Twój ogród zasługuje na najlepsze</span>
+                <span className="care-note">{data.care}</span>
+              </div>
+            </div>
+          </div>
+          <div className="hint no-print"><Pencil size={13}/> Kliknij dowolny tekst na karcie, aby go poprawić · zdjęcie zmienisz przyciskami „Sieć" / „Generuj AI" / „Wgraj".</div>
+        </>)}
+      </div>
+
+      {modal==="name" && (
+        <Modal title="Jaka to roślina?" onClose={()=>setModal(null)}>
+          <div className="modal-body">
+            <label>Nazwa rośliny</label>
+            <input className="field" autoFocus value={nameInput}
+                   placeholder="np. pomidor, Monstera dziurawa, hortensja…"
+                   onChange={(e)=>setNameInput(e.target.value)}
+                   onKeyDown={(e)=>e.key==="Enter" && !loading && generate()} />
+            <div className="modal-note">
+              {hasCreds
+                ? "AI przygotuje ujednolicony opis, a aplikacja pobierze zdjęcie rośliny."
+                : "Bez ustawionego klucza/proxy aplikacja otworzy pustą, edytowalną etykietę — opis uzupełnisz ręcznie. Aby opis powstawał automatycznie, ustaw klucz lub proxy w ⚙."}
+            </div>
+            {error && <div className="err">{error}</div>}
+          </div>
+          <div className="modal-foot">
+            <button className="btn" onClick={()=>setModal(null)}>Anuluj</button>
+            <button className="btn primary" onClick={generate} disabled={loading}>
+              {loading ? <><Loader size={15}/> Generuję…</> : <>{hasCreds ? "Generuj opis" : "Utwórz etykietę"} <ArrowRight size={15}/></>}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {modal==="price" && (
+        <Modal title="Jaka ma być cena?" onClose={()=>setModal(null)}>
+          <div className="modal-body">
+            <label>Cena detaliczna</label>
+            <div className="price-row">
+              <input className="field" autoFocus inputMode="decimal" value={priceInput}
+                     placeholder="np. 49,99" onChange={(e)=>setPriceInput(e.target.value)}
+                     onKeyDown={(e)=>e.key==="Enter" && savePrice()} />
+              <div className="cur">zł</div>
+            </div>
+            <div className="modal-note">Cena pojawi się po lewej stronie karty, pod opisem rośliny.</div>
+          </div>
+          <div className="modal-foot">
+            <button className="btn" onClick={()=>setModal(null)}>Pomiń</button>
+            <button className="btn primary" onClick={savePrice}>Zapisz cenę</button>
+          </div>
+        </Modal>
+      )}
+
+      {modal==="settings" && (
+        <Modal title="Ustawienia generowania opisu" onClose={()=>setModal(data?null:"name")}>
+          <div className="modal-body">
+            <div className="settings-field">
+              <label>Adres backendu / proxy (zalecane)</label>
+              <input className="field" value={pInput} placeholder="https://twoja-apka.vercel.app/api/generate"
+                     onChange={(e)=>setPInput(e.target.value)} />
+            </div>
+            <div className="or">albo</div>
+            <div className="settings-field">
+              <label>Klucz Anthropic (tylko lokalnie)</label>
+              <input className="field" type="password" value={kInput} placeholder="sk-ant-…"
+                     onChange={(e)=>setKInput(e.target.value)} />
+              <div className="warn">Klucz wpisany tutaj zostaje tylko w tej przeglądarce. Używaj go wyłącznie na komputerze firmowym / stronie niepublicznej — nigdy na publicznie dostępnej stronie, bo każdy mógłby go odczytać. Na hosting użyj proxy.</div>
+            </div>
+          </div>
+          <div className="modal-foot">
+            <button className="btn" onClick={()=>setModal(data?null:"name")}>Anuluj</button>
+            <button className="btn primary" onClick={saveSettings}>Zapisz</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

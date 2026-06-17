@@ -1,0 +1,6 @@
+{
+  "name": "agra-psk-etykiety",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generator ujednoliconych etykiet roślin Agra PSK (strona statyczna + pośrednik do Anthropic API na Vercel)."
+}
