@@ -4,9 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Agra PSK · Generator etykiet roślin</title>
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js" onerror="window.__fail=(window.__fail||[]).concat('React')"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" onerror="window.__fail=(window.__fail||[]).concat('ReactDOM')"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js" onerror="window.__fail=(window.__fail||[]).concat('Babel')"></script>
 <style>
 html,body{margin:0;padding:0;}
 
@@ -168,400 +165,360 @@ html,body{margin:0;padding:0;}
 }
 
 
-/* dodatki dla wersji standalone */
+/* dodatki */
+:root{
+  --ink:#15241A; --forest:#1E3A28; --forest-2:#274A33;
+  --paper:#F5EFE1; --paper-2:#EBE2CE; --paper-line:rgba(21,36,26,.14);
+  --brass:#A9842E; --brass-l:#CDA24A; --sage:#6E8B6A; --leaf:#8BC34A;
+}
+.scrim, .scrim *{ box-sizing:border-box; }
 .settings-field{margin-bottom:14px;}
 .settings-field:last-child{margin-bottom:0;}
 .warn{background:#fff6e6;color:#7a5a16;border:1px solid #e6d3a6;border-radius:9px;padding:10px 12px;font-size:12px;line-height:1.5;margin-top:4px;}
 .or{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7E8E7B;text-align:center;margin:10px 0;}
+.boot{color:#9FB39C;font-family:system-ui,sans-serif;padding:48px;text-align:center;}
 </style>
 </head>
 <body>
-<div id="root"><div style="color:#9FB39C;font-family:system-ui,sans-serif;padding:48px;text-align:center">Ładowanie aplikacji…</div></div>
+<div id="root"><div class="boot">Ładowanie aplikacji…</div></div>
+<input type="file" id="file" accept="image/*" style="display:none" />
 
-<script type="text/babel" data-presets="react">
-const { useState, useRef } = React;
-
-const LOGO = "data:image/png;base64,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";
-
-/* ── ikony (inline SVG, bez bibliotek) ── */
-const Svg = ({size=16, className, children}) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>
-);
-const Sun = (p)=><Svg {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></Svg>;
-const Droplets = (p)=><Svg {...p}><path d="M12 2.5s6 5.7 6 10.5a6 6 0 0 1-12 0c0-4.8 6-10.5 6-10.5z"/></Svg>;
-const Snowflake = (p)=><Svg {...p}><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/></Svg>;
-const Ruler = (p)=><Svg {...p}><path d="M3 17 17 3l4 4L7 21z"/><path d="M7.5 12.5l2 2M10.5 9.5l2 2M13.5 6.5l2 2"/></Svg>;
-const Sparkles = (p)=><Svg {...p}><path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/><path d="M19 14l.6 1.6L21 16l-1.4.6L19 18l-.6-1.4L17 16l1.4-.4z"/></Svg>;
-const Printer = (p)=><Svg {...p}><path d="M6 9V3h12v6"/><path d="M6 17H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><rect x="6" y="13" width="12" height="8" rx="1"/></Svg>;
-const ImagePlus = (p)=><Svg {...p}><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M3 14l4-4 3 3"/><circle cx="8" cy="8" r="1.4"/><path d="M19 13v6M22 16h-6"/></Svg>;
-const Pencil = (p)=><Svg {...p}><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></Svg>;
-const X = (p)=><Svg {...p}><path d="M6 6l12 12M18 6L6 18"/></Svg>;
-const ArrowRight = (p)=><Svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></Svg>;
-const Wand = (p)=><Svg {...p}><path d="M4 20L15 9"/><path d="M13 7l4 4"/><path d="M18 3l.6 1.6L20 5l-1.4.6L18 7l-.6-1.4L16 5l1.4-.6z"/></Svg>;
-const Globe = (p)=><Svg {...p}><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></Svg>;
-const Cog = (p)=><Svg {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.6 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.6H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8 1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></Svg>;
-const Loader = (p)=><Svg {...p} className="spin"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></Svg>;
-
-const PROMPT = (name) => `Jesteś doświadczonym ogrodnikiem przygotowującym ujednolicone etykiety roślin dla centrum ogrodniczego "Agra PSK" w Kłodzku.
-Na podstawie nazwy rośliny przygotuj zwięzły, rzetelny i poprawny merytorycznie opis na etykietę sprzedażową.
-Zwróć WYŁĄCZNIE obiekt JSON (bez komentarzy, bez znaczników), dokładnie wg schematu:
-{
- "namePl": "polska nazwa zwyczajowa",
- "nameLat": "nazwa łacińska (rodzaj i gatunek)",
- "intro": "maks. 2 krótkie zdania, łącznie do 25 słów, rzeczowe i zachęcające",
- "light": "wymagania świetlne, maks. 4 słowa",
- "water": "podlewanie, maks. 4 słowa",
- "frost": "mrozoodporność lub strefa, maks. 4 słowa",
- "height": "docelowa wysokość, maks. 4 słowa",
- "care": "jedna krótka wskazówka, maks. 12 słów; jeśli roślina jest trująca dla ludzi lub zwierząt — koniecznie to zaznacz"
-}
-Roślina podana przez sprzedawcę: "${name}"
-Pisz po polsku.`;
-
-/* ── zdjęcie z internetu (Wikipedia, CORS przez origin=*) ── */
-async function wikiImage(query, lang) {
-  const params = new URLSearchParams({
-    action:"query", format:"json", generator:"search",
-    gsrsearch:query, gsrlimit:"1", prop:"pageimages",
-    piprop:"thumbnail", pithumbsize:"1000", redirects:"1", origin:"*",
-  });
-  const r = await fetch(`https://${lang}.wikipedia.org/w/api.php?${params}`);
-  const j = await r.json();
-  const pages = j && j.query && j.query.pages;
-  if (!pages) return null;
-  const first = Object.values(pages).sort((a,b)=>(a.index||0)-(b.index||0))[0];
-  return (first && first.thumbnail && first.thumbnail.source) || null;
-}
-async function findImage(d, raw) {
-  const tries = [[d.nameLat,"pl"],[d.namePl,"pl"],[d.nameLat,"en"],[raw,"pl"],[d.namePl,"en"]].filter(t=>t[0]);
-  for (const [q,l] of tries) { try { const u = await wikiImage(q,l); if (u) return u; } catch(e){} }
-  return null;
-}
-/* ── generowane zdjęcie AI (Pollinations, bez klucza) ── */
-function aiImageUrl(d, raw) {
-  const subject = [d&&d.namePl, d&&d.nameLat].filter(Boolean).join(", ") || raw || "roślina";
-  const prompt = `realistic photograph of ${subject}, whole plant, natural daylight, garden center product photo, sharp focus, high detail, no text, no watermark`;
-  const seed = Math.floor(Math.random()*100000);
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=900&height=720&nologo=true&seed=${seed}`;
-}
-
-function extractPlant(data){
-  if (data && typeof data==="object" && data.namePl) return data;
-  let text="";
-  if (data && data.content) text = data.content.map(b=>b.text||"").join("");
-  else text = (data && (data.text||data.completion)) || (typeof data==="string"?data:JSON.stringify(data));
-  return JSON.parse(text.replace(/```json|```/g,"").trim());
-}
-
-function Modal({ title, children, onClose }) {
-  return (
-    <div className="scrim no-print" onMouseDown={onClose}>
-      <div className="modal" onMouseDown={(e)=>e.stopPropagation()}>
-        <div className="modal-head"><h3>{title}</h3>
-          <button className="x" onClick={onClose}><X size={18}/></button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-const CARE = [
-  { key:"light", label:"Stanowisko", Icon:Sun },
-  { key:"water", label:"Podlewanie", Icon:Droplets },
-  { key:"frost", label:"Mrozoodporność", Icon:Snowflake },
-  { key:"height", label:"Wysokość", Icon:Ruler },
-];
-
-const load = (k,d)=>{ try { const v=localStorage.getItem(k); return v===null?d:v; } catch(e){ return d; } };
-
-function App() {
-  const [modal, setModal] = useState("name");
-  const [nameInput, setNameInput] = useState("");
-  const [priceInput, setPriceInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [data, setData] = useState(null);
-  const [price, setPrice] = useState("");
-  const [photo, setPhoto] = useState(null);
-  const [photoLoading, setPhotoLoading] = useState(false);
-  const [photoSource, setPhotoSource] = useState(null);
-  const [photoFailed, setPhotoFailed] = useState(false);
-  const [genId, setGenId] = useState(0);
-  const [proxyUrl, setProxyUrl] = useState(()=>load("apsk_proxy",""));
-  const [apiKey, setApiKey] = useState(()=>load("apsk_key",""));
-  const [pInput, setPInput] = useState("");
-  const [kInput, setKInput] = useState("");
-  const fileRef = useRef(null);
-
-  const edit = (k,v) => setData(d => ({ ...d, [k]: v }));
-
-  async function loadWeb(d, raw) {
-    setPhotoFailed(false); setPhotoLoading(true); setPhotoSource("web");
-    const url = await findImage(d, raw);
-    if (url) setPhoto(url);
-    else { setPhoto(null); setPhotoLoading(false); setPhotoFailed(true); }
-  }
-  function genAI(d, raw) {
-    setPhotoFailed(false); setPhotoLoading(true); setPhotoSource("ai");
-    setPhoto(aiImageUrl(d, raw));
-  }
-
-  function openBlank(name){
-    const blank = {namePl:name, nameLat:"", intro:"", light:"", water:"", frost:"", height:"", care:""};
-    setData(blank); setGenId(n=>n+1); setPhoto(null); loadWeb(blank, name);
-    setModal(price ? null : "price");
-  }
-
-  async function generate() {
-    const name = nameInput.trim();
-    if (!name) { setError("Wpisz nazwę rośliny."); return; }
-    if (!proxyUrl && !apiKey) { openBlank(name); return; } // brak konfiguracji → pusta etykieta
-    setLoading(true); setError("");
-    try {
-      let parsed;
-      if (proxyUrl) {
-        const res = await fetch(proxyUrl, { method:"POST", headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ name, prompt: PROMPT(name) }) });
-        parsed = extractPlant(await res.json());
-      } else {
-        const res = await fetch("https://api.anthropic.com/v1/messages", { method:"POST",
-          headers:{ "Content-Type":"application/json", "x-api-key":apiKey,
-                    "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
-          body: JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000,
-                                 messages:[{role:"user", content:PROMPT(name)}] }) });
-        parsed = extractPlant(await res.json());
-      }
-      setData(parsed); setGenId(n=>n+1); setPhoto(null); loadWeb(parsed, name);
-      setModal(price ? null : "price");
-    } catch(e) {
-      setError("Nie udało się wygenerować opisu. Sprawdź ustawienia (proxy/klucz) lub uściślij nazwę rośliny.");
-    } finally { setLoading(false); }
-  }
-
-  function savePrice(){ setPrice(priceInput.trim()); setModal(null); }
-  function openSettings(){ setPInput(proxyUrl); setKInput(apiKey); setModal("settings"); }
-  function saveSettings(){
-    const p=pInput.trim(), k=kInput.trim();
-    setProxyUrl(p); setApiKey(k);
-    try{ localStorage.setItem("apsk_proxy",p); localStorage.setItem("apsk_key",k); }catch(e){}
-    setModal(data ? null : "name");
-  }
-  function onFile(e){
-    const f = e.target.files && e.target.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = () => { setPhoto(r.result); setPhotoSource("upload"); setPhotoLoading(false); setPhotoFailed(false); };
-    r.readAsDataURL(f);
-  }
-
-  const hasCreds = !!(proxyUrl || apiKey);
-
-  return (
-    <div className="app">
-      <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{display:"none"}} />
-      <div className="wrap">
-        <div className="top no-print">
-          <div className="brand">
-            <div className="mark"><img src={LOGO} alt="Agra PSK" /></div>
-            <div><div className="wm">Agra PSK</div><div className="sub">Generator etykiet roślin</div></div>
-          </div>
-          <div className="actions">
-            {data && <>
-              <button className="btn" onClick={()=>{ setNameInput(""); setModal("name"); }}><Sparkles size={15}/> Zmień roślinę</button>
-              <button className="btn" onClick={()=>{ setPriceInput(price); setModal("price"); }}><Pencil size={15}/> Cena</button>
-              <button className="btn primary" onClick={()=>window.print()}><Printer size={15}/> Drukuj / PDF</button>
-            </>}
-            <button className="btn" onClick={openSettings} title="Ustawienia generowania opisu"><Cog size={15}/></button>
-          </div>
-        </div>
-
-        {!data && !modal && (
-          <div className="start no-print">
-            <div className="big">Ujednolicone opisy roślin</div>
-            <p>Wpisz nazwę rośliny, a aplikacja przygotuje gotową, poziomą etykietę w stylu Agra PSK —
-               z opisem, ceną i automatycznie pobranym zdjęciem.</p>
-            <button className="btn primary" onClick={()=>setModal("name")}><Sparkles size={16}/> Nowy opis rośliny</button>
-          </div>
-        )}
-
-        {data && (<>
-          <div className="stage">
-            <div className="card print-area" key={genId}>
-              <div className="card-head">
-                <div className="l">
-                  <div className="leaf"><img src={LOGO} alt="Agra PSK"/></div>
-                  <div><div className="name">Agra PSK</div><div className="eyebrow">Centrum Ogrodnicze · Kłodzko</div></div>
-                </div>
-                <div className="r">od 1991 · Kotlina Kłodzka<br/>naszogrodniczy.pl</div>
-              </div>
-
-              <div className="card-body">
-                <div className="left">
-                  <div className="pl-name" contentEditable suppressContentEditableWarning
-                       onBlur={(e)=>edit("namePl", e.currentTarget.textContent)}>{data.namePl}</div>
-                  <div className="lat-name" contentEditable suppressContentEditableWarning
-                       onBlur={(e)=>edit("nameLat", e.currentTarget.textContent)}>{data.nameLat}</div>
-                  <div className="intro" contentEditable suppressContentEditableWarning
-                       onBlur={(e)=>edit("intro", e.currentTarget.textContent)}>{data.intro}</div>
-
-                  <div className="care">
-                    {CARE.map(({key,label,Icon})=>(
-                      <div className="care-row" key={key}>
-                        <div className="care-ic"><Icon size={15}/></div>
-                        <div>
-                          <div className="care-k">{label}</div>
-                          <div className="care-v" contentEditable suppressContentEditableWarning
-                               onBlur={(e)=>edit(key, e.currentTarget.textContent)}>{data[key]}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="price-tag">
-                    <span className="cap">Cena</span>
-                    <span className="val">
-                      <span className="num" contentEditable suppressContentEditableWarning
-                            onBlur={(e)=>setPrice(e.currentTarget.textContent)}>{price || "—"}</span>
-                      <span className="cur">zł</span>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="right">
-                  {photo && (
-                    <img className="photo" src={photo} alt={data.namePl}
-                         onLoad={()=>setPhotoLoading(false)}
-                         onError={()=>{ setPhoto(null); setPhotoLoading(false); setPhotoFailed(true); }} />
-                  )}
-                  {photoLoading && (
-                    <div className="photo-loading">
-                      <Loader size={26}/>
-                      <div style={{fontSize:12.5,fontWeight:500}}>
-                        {photoSource==="ai" ? "Generuję zdjęcie AI…" : "Szukam zdjęcia rośliny…"}
-                      </div>
-                    </div>
-                  )}
-                  {!photo && !photoLoading && (
-                    <div className="photo-empty" onClick={()=>fileRef.current && fileRef.current.click()}>
-                      <ImagePlus size={30}/>
-                      <div style={{fontSize:13,fontWeight:500}}>{photoFailed ? "Nie udało się pobrać ani wygenerować" : "Brak zdjęcia"}</div>
-                      <div style={{fontSize:11}}>użyj przycisków poniżej lub kliknij, aby wgrać</div>
-                    </div>
-                  )}
-                  {photo && !photoLoading && photoSource!=="upload" && (
-                    <div className="photo-credit">{photoSource==="ai" ? "zdjęcie wygenerowane AI" : "źródło: Wikimedia"}</div>
-                  )}
-                  <div className="photo-tools no-print">
-                    <button onClick={()=>loadWeb(data, nameInput||data.namePl)} title="Pobierz prawdziwe zdjęcie z sieci"><Globe size={14}/> Sieć</button>
-                    <button onClick={()=>genAI(data, nameInput||data.namePl)} title="Wygeneruj zdjęcie AI"><Wand size={14}/> Generuj AI</button>
-                    <button onClick={()=>fileRef.current && fileRef.current.click()} title="Wgraj własne zdjęcie"><ImagePlus size={14}/> Wgraj</button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card-foot">
-                <span className="tag">Twój ogród zasługuje na najlepsze</span>
-                <span className="care-note">{data.care}</span>
-              </div>
-            </div>
-          </div>
-          <div className="hint no-print"><Pencil size={13}/> Kliknij dowolny tekst na karcie, aby go poprawić · zdjęcie zmienisz przyciskami „Sieć" / „Generuj AI" / „Wgraj".</div>
-        </>)}
-      </div>
-
-      {modal==="name" && (
-        <Modal title="Jaka to roślina?" onClose={()=>setModal(null)}>
-          <div className="modal-body">
-            <label>Nazwa rośliny</label>
-            <input className="field" autoFocus value={nameInput}
-                   placeholder="np. pomidor, Monstera dziurawa, hortensja…"
-                   onChange={(e)=>setNameInput(e.target.value)}
-                   onKeyDown={(e)=>e.key==="Enter" && !loading && generate()} />
-            <div className="modal-note">
-              {hasCreds
-                ? "AI przygotuje ujednolicony opis, a aplikacja pobierze zdjęcie rośliny."
-                : "Bez ustawionego klucza/proxy aplikacja otworzy pustą, edytowalną etykietę — opis uzupełnisz ręcznie. Aby opis powstawał automatycznie, ustaw klucz lub proxy w ⚙."}
-            </div>
-            {error && <div className="err">{error}</div>}
-          </div>
-          <div className="modal-foot">
-            <button className="btn" onClick={()=>setModal(null)}>Anuluj</button>
-            <button className="btn primary" onClick={generate} disabled={loading}>
-              {loading ? <><Loader size={15}/> Generuję…</> : <>{hasCreds ? "Generuj opis" : "Utwórz etykietę"} <ArrowRight size={15}/></>}
-            </button>
-          </div>
-        </Modal>
-      )}
-
-      {modal==="price" && (
-        <Modal title="Jaka ma być cena?" onClose={()=>setModal(null)}>
-          <div className="modal-body">
-            <label>Cena detaliczna</label>
-            <div className="price-row">
-              <input className="field" autoFocus inputMode="decimal" value={priceInput}
-                     placeholder="np. 49,99" onChange={(e)=>setPriceInput(e.target.value)}
-                     onKeyDown={(e)=>e.key==="Enter" && savePrice()} />
-              <div className="cur">zł</div>
-            </div>
-            <div className="modal-note">Cena pojawi się po lewej stronie karty, pod opisem rośliny.</div>
-          </div>
-          <div className="modal-foot">
-            <button className="btn" onClick={()=>setModal(null)}>Pomiń</button>
-            <button className="btn primary" onClick={savePrice}>Zapisz cenę</button>
-          </div>
-        </Modal>
-      )}
-
-      {modal==="settings" && (
-        <Modal title="Ustawienia generowania opisu" onClose={()=>setModal(data?null:"name")}>
-          <div className="modal-body">
-            <div className="settings-field">
-              <label>Adres backendu / proxy (zalecane)</label>
-              <input className="field" value={pInput} placeholder="https://twoja-apka.vercel.app/api/generate"
-                     onChange={(e)=>setPInput(e.target.value)} />
-            </div>
-            <div className="or">albo</div>
-            <div className="settings-field">
-              <label>Klucz Anthropic (tylko lokalnie)</label>
-              <input className="field" type="password" value={kInput} placeholder="sk-ant-…"
-                     onChange={(e)=>setKInput(e.target.value)} />
-              <div className="warn">Klucz wpisany tutaj zostaje tylko w tej przeglądarce. Używaj go wyłącznie na komputerze firmowym / stronie niepublicznej — nigdy na publicznie dostępnej stronie, bo każdy mógłby go odczytać. Na hosting użyj proxy.</div>
-            </div>
-          </div>
-          <div className="modal-foot">
-            <button className="btn" onClick={()=>setModal(data?null:"name")}>Anuluj</button>
-            <button className="btn primary" onClick={saveSettings}>Zapisz</button>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
-
-try {
-  ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-} catch (e) {
-  document.getElementById("root").innerHTML =
-    '<pre style="white-space:pre-wrap;color:#ffb4b4;font-family:monospace;max-width:680px;margin:40px auto;padding:20px;background:#15241A;border-radius:10px">Błąd uruchomienia aplikacji:\n\n' +
-    ((e && e.stack) || e) + '</pre>';
-}
-</script>
 <script>
-window.addEventListener('load', function(){
-  setTimeout(function(){
-    var root = document.getElementById('root');
-    if (root && root.querySelector('.app')) return; // wystartowała poprawnie
-    var miss = (window.__fail||[]).slice();
-    if (!window.React && miss.indexOf('React')<0) miss.push('React');
-    if (!window.ReactDOM && miss.indexOf('ReactDOM')<0) miss.push('ReactDOM');
-    if (!window.Babel && miss.indexOf('Babel')<0) miss.push('Babel (transpiler)');
-    var msg = miss.length
-      ? 'Nie załadowały się biblioteki: <b>' + miss.join(', ') + '</b>.<br>Najczęstsze przyczyny: brak dostępu do internetu na tej stronie, blokada (adblock / sieć firmowa), albo chwilowy problem z CDN unpkg.com.'
-      : 'Biblioteki załadowały się, ale aplikacja nie wystartowała — to błąd w skrypcie. Otwórz konsolę przeglądarki (F12 → Console) i prześlij pierwszy czerwony błąd.';
-    root.innerHTML = '<div style="color:#E7EDE6;font-family:system-ui,sans-serif;max-width:600px;margin:60px auto;padding:24px;border:1px solid #3a513f;border-radius:12px;background:#15241A;line-height:1.6">⚠️ Aplikacja się nie uruchomiła.<br><br>' + msg + '</div>';
-  }, 7000);
-});
+(function(){
+  "use strict";
+
+  var LOGO = "data:image/png;base64,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";
+
+  /* ---------- ikony (SVG jako tekst) ---------- */
+  function svg(inner, size, cls){
+    return '<svg class="'+(cls||'')+'" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
+  }
+  var IC = {
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    drop:'<path d="M12 2.5s6 5.7 6 10.5a6 6 0 0 1-12 0c0-4.8 6-10.5 6-10.5z"/>',
+    snow:'<path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/>',
+    ruler:'<path d="M3 17 17 3l4 4L7 21z"/><path d="M7.5 12.5l2 2M10.5 9.5l2 2M13.5 6.5l2 2"/>',
+    spark:'<path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/><path d="M19 14l.6 1.6L21 16l-1.4.6L19 18l-.6-1.4L17 16l1.4-.4z"/>',
+    print:'<path d="M6 9V3h12v6"/><path d="M6 17H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><rect x="6" y="13" width="12" height="8" rx="1"/>',
+    img:'<rect x="3" y="3" width="13" height="13" rx="2"/><path d="M3 14l4-4 3 3"/><circle cx="8" cy="8" r="1.4"/><path d="M19 13v6M22 16h-6"/>',
+    pencil:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
+    x:'<path d="M6 6l12 12M18 6L6 18"/>',
+    arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+    wand:'<path d="M4 20L15 9"/><path d="M13 7l4 4"/><path d="M18 3l.6 1.6L20 5l-1.4.6L18 7l-.6-1.4L16 5l1.4-.6z"/>',
+    globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/>',
+    cog:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.6 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.6H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8 1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>',
+    loader:'<path d="M21 12a9 9 0 1 1-6.2-8.5"/>'
+  };
+
+  /* ---------- stan ---------- */
+  function load(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v; }catch(e){ return d; } }
+  function store(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  var state = {
+    data:null, price:"", photo:null, photoLoading:false, photoSource:null, photoFailed:false,
+    lastName:"", proxyUrl: load("apsk_proxy",""), apiKey: load("apsk_key","")
+  };
+  function hasCreds(){ return !!(state.proxyUrl || state.apiKey); }
+
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+  function el(html){ var t=document.createElement("template"); t.innerHTML=String(html).trim(); return t.content.firstChild; }
+
+  var CARE = [
+    {key:"light", label:"Stanowisko",     icon:IC.sun},
+    {key:"water", label:"Podlewanie",     icon:IC.drop},
+    {key:"frost", label:"Mrozoodporność", icon:IC.snow},
+    {key:"height",label:"Wysokość",       icon:IC.ruler}
+  ];
+
+  function PROMPT(name){
+    return 'Jesteś doświadczonym ogrodnikiem przygotowującym ujednolicone etykiety roślin dla centrum ogrodniczego "Agra PSK" w Kłodzku.\n'
+      + 'Na podstawie nazwy rośliny przygotuj zwięzły, rzetelny i poprawny merytorycznie opis na etykietę sprzedażową.\n'
+      + 'Zwróć WYŁĄCZNIE obiekt JSON (bez komentarzy, bez znaczników), dokładnie wg schematu:\n'
+      + '{\n'
+      + ' "namePl": "polska nazwa zwyczajowa",\n'
+      + ' "nameLat": "nazwa łacińska (rodzaj i gatunek)",\n'
+      + ' "intro": "maks. 2 krótkie zdania, łącznie do 25 słów, rzeczowe i zachęcające",\n'
+      + ' "light": "wymagania świetlne, maks. 4 słowa",\n'
+      + ' "water": "podlewanie, maks. 4 słowa",\n'
+      + ' "frost": "mrozoodporność lub strefa, maks. 4 słowa",\n'
+      + ' "height": "docelowa wysokość, maks. 4 słowa",\n'
+      + ' "care": "jedna krótka wskazówka, maks. 12 słów; jeśli roślina jest trująca dla ludzi lub zwierząt — koniecznie to zaznacz"\n'
+      + '}\n'
+      + 'Roślina podana przez sprzedawcę: "'+name+'"\n'
+      + 'Pisz po polsku.';
+  }
+
+  /* ---------- zdjęcia ---------- */
+  function wikiImage(query, lang){
+    var params = "action=query&format=json&generator=search&gsrsearch="+encodeURIComponent(query)
+      + "&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=1000&redirects=1&origin=*";
+    return fetch("https://"+lang+".wikipedia.org/w/api.php?"+params).then(function(r){return r.json();}).then(function(j){
+      var pages = j && j.query && j.query.pages; if(!pages) return null;
+      var arr = Object.keys(pages).map(function(k){return pages[k];}).sort(function(a,b){return (a.index||0)-(b.index||0);});
+      var first = arr[0];
+      return (first && first.thumbnail && first.thumbnail.source) || null;
+    });
+  }
+  function findImage(d, raw){
+    var tries = [[d.nameLat,"pl"],[d.namePl,"pl"],[d.nameLat,"en"],[raw,"pl"],[d.namePl,"en"]].filter(function(t){return t[0];});
+    var i = 0;
+    function next(){
+      if(i>=tries.length) return Promise.resolve(null);
+      var t = tries[i++];
+      return wikiImage(t[0],t[1]).then(function(u){ return u || next(); }, function(){ return next(); });
+    }
+    return next();
+  }
+  function aiImageUrl(d, raw){
+    var subject = [d&&d.namePl, d&&d.nameLat].filter(Boolean).join(", ") || raw || "roślina";
+    var prompt = "realistic photograph of "+subject+", whole plant, natural daylight, garden center product photo, sharp focus, high detail, no text, no watermark";
+    var seed = Math.floor(Math.random()*100000);
+    return "https://image.pollinations.ai/prompt/"+encodeURIComponent(prompt)+"?width=900&height=720&nologo=true&seed="+seed;
+  }
+  function extractPlant(data){
+    if(data && typeof data==="object" && data.namePl) return data;
+    var text="";
+    if(data && data.content) text = data.content.map(function(b){return b.text||"";}).join("");
+    else text = (data && (data.text||data.completion)) || (typeof data==="string"?data:JSON.stringify(data));
+    return JSON.parse(String(text).replace(/```json|```/g,"").trim());
+  }
+
+  /* ---------- render ---------- */
+  var root = document.getElementById("root");
+
+  function topBar(){
+    var actions = "";
+    if(state.data){
+      actions += '<button class="btn" data-top="name">'+svg(IC.spark,15)+' Zmień roślinę</button>'
+              +  '<button class="btn" data-top="price">'+svg(IC.pencil,15)+' Cena</button>'
+              +  '<button class="btn primary" data-top="print">'+svg(IC.print,15)+' Drukuj / PDF</button>';
+    }
+    actions += '<button class="btn" data-top="settings" title="Ustawienia generowania opisu">'+svg(IC.cog,15)+'</button>';
+    return '<div class="top no-print"><div class="brand"><div class="mark"><img src="'+LOGO+'" alt="Agra PSK"></div>'
+      + '<div><div class="wm">Agra PSK</div><div class="sub">Generator etykiet roślin</div></div></div>'
+      + '<div class="actions">'+actions+'</div></div>';
+  }
+
+  function startHTML(){
+    return '<div class="start no-print"><div class="big">Ujednolicone opisy roślin</div>'
+      + '<p>Wpisz nazwę rośliny, a aplikacja przygotuje gotową, poziomą etykietę w stylu Agra PSK — z opisem, ceną i automatycznie pobranym zdjęciem.</p>'
+      + '<button class="btn primary" id="startBtn">'+svg(IC.spark,16)+' Nowy opis rośliny</button></div>';
+  }
+
+  function cardHTML(){
+    var d = state.data;
+    var care = CARE.map(function(c){
+      return '<div class="care-row"><div class="care-ic">'+svg(c.icon,15)+'</div>'
+        + '<div><div class="care-k">'+c.label+'</div>'
+        + '<div class="care-v" contenteditable data-k="'+c.key+'">'+esc(d[c.key]||"")+'</div></div></div>';
+    }).join("");
+    return '<div class="stage"><div class="card print-area">'
+      + '<div class="card-head"><div class="l"><div class="leaf"><img src="'+LOGO+'" alt="Agra PSK"></div>'
+      +   '<div><div class="name">Agra PSK</div><div class="eyebrow">Centrum Ogrodnicze · Kłodzko</div></div></div>'
+      +   '<div class="r">od 1991 · Kotlina Kłodzka<br>naszogrodniczy.pl</div></div>'
+      + '<div class="card-body"><div class="left">'
+      +   '<div class="pl-name" contenteditable data-k="namePl">'+esc(d.namePl||"")+'</div>'
+      +   '<div class="lat-name" contenteditable data-k="nameLat">'+esc(d.nameLat||"")+'</div>'
+      +   '<div class="intro" contenteditable data-k="intro">'+esc(d.intro||"")+'</div>'
+      +   '<div class="care">'+care+'</div>'
+      +   '<div class="price-tag"><span class="cap">Cena</span><span class="val">'
+      +     '<span class="num" contenteditable data-price="1">'+esc(state.price||"—")+'</span><span class="cur">zł</span></span></div>'
+      + '</div><div class="right" id="photo"></div></div>'
+      + '<div class="card-foot"><span class="tag">Twój ogród zasługuje na najlepsze</span>'
+      +   '<span class="care-note" data-k="care" contenteditable>'+esc(d.care||"")+'</span></div>'
+      + '</div></div>'
+      + '<div class="hint no-print">'+svg(IC.pencil,13)+' Kliknij dowolny tekst na karcie, aby go poprawić · zdjęcie zmienisz przyciskami „Sieć” / „Generuj AI” / „Wgraj”.</div>';
+  }
+
+  function mount(){
+    root.innerHTML = '<div class="app"><div class="wrap">' + topBar() + (state.data ? cardHTML() : startHTML()) + '</div></div>';
+    wireTop();
+    if(state.data){ wireCard(); updatePhoto(); }
+  }
+
+  function wireTop(){
+    var btns = root.querySelectorAll("[data-top]");
+    for(var i=0;i<btns.length;i++){
+      (function(b){
+        b.onclick = function(){
+          var t=b.getAttribute("data-top");
+          if(t==="name") openName();
+          else if(t==="price") openPrice();
+          else if(t==="print") window.print();
+          else if(t==="settings") openSettings();
+        };
+      })(btns[i]);
+    }
+    var sb = document.getElementById("startBtn"); if(sb) sb.onclick = openName;
+  }
+
+  function wireCard(){
+    var eds = root.querySelectorAll("[data-k]");
+    for(var i=0;i<eds.length;i++){
+      (function(n){ n.addEventListener("blur", function(){ if(state.data) state.data[n.getAttribute("data-k")] = n.textContent; }); })(eds[i]);
+    }
+    var p = root.querySelector("[data-price]");
+    if(p) p.addEventListener("blur", function(){ state.price = p.textContent; });
+  }
+
+  function updatePhoto(){
+    var box = document.getElementById("photo"); if(!box) return;
+    var html = "";
+    if(state.photo) html += '<img class="photo" id="photoImg" src="'+state.photo+'" alt="">';
+    if(state.photoLoading)
+      html += '<div class="photo-loading">'+svg(IC.loader,26,"spin")+'<div style="font-size:12.5px;font-weight:500">'+(state.photoSource==="ai"?"Generuję zdjęcie AI…":"Szukam zdjęcia rośliny…")+'</div></div>';
+    if(!state.photo && !state.photoLoading)
+      html += '<div class="photo-empty" id="photoEmpty">'+svg(IC.img,30)+'<div style="font-size:13px;font-weight:500">'+(state.photoFailed?"Nie udało się pobrać ani wygenerować":"Brak zdjęcia")+'</div><div style="font-size:11px">użyj przycisków poniżej lub kliknij, aby wgrać</div></div>';
+    if(state.photo && !state.photoLoading && state.photoSource!=="upload")
+      html += '<div class="photo-credit">'+(state.photoSource==="ai"?"zdjęcie wygenerowane AI":"źródło: Wikimedia")+'</div>';
+    html += '<div class="photo-tools no-print">'
+      + '<button data-act="web">'+svg(IC.globe,14)+' Sieć</button>'
+      + '<button data-act="ai">'+svg(IC.wand,14)+' Generuj AI</button>'
+      + '<button data-act="upload">'+svg(IC.img,14)+' Wgraj</button></div>';
+    box.innerHTML = html;
+
+    var img = document.getElementById("photoImg");
+    if(img){
+      img.onload = function(){ state.photoLoading=false; updatePhoto(); };
+      img.onerror = function(){ state.photo=null; state.photoLoading=false; state.photoFailed=true; updatePhoto(); };
+    }
+    var empty = document.getElementById("photoEmpty"); if(empty) empty.onclick = pickFile;
+    var tb = box.querySelectorAll(".photo-tools button");
+    for(var i=0;i<tb.length;i++){
+      (function(b){ b.onclick = function(){ var a=b.getAttribute("data-act"); if(a==="web") loadWeb(); else if(a==="ai") genAI(); else pickFile(); }; })(tb[i]);
+    }
+  }
+
+  /* ---------- akcje zdjęcia ---------- */
+  function curName(){ return state.lastName || (state.data && state.data.namePl) || ""; }
+  function loadWeb(raw){
+    raw = raw || curName();
+    state.photoFailed=false; state.photoLoading=true; state.photoSource="web"; updatePhoto();
+    findImage(state.data, raw).then(function(url){
+      if(url){ state.photo=url; updatePhoto(); }
+      else { state.photo=null; state.photoLoading=false; state.photoFailed=true; updatePhoto(); }
+    });
+  }
+  function genAI(){
+    state.photoFailed=false; state.photoLoading=true; state.photoSource="ai";
+    state.photo = aiImageUrl(state.data, curName()); updatePhoto();
+  }
+  function pickFile(){ document.getElementById("file").click(); }
+  document.getElementById("file").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0]; if(!f) return;
+    var r = new FileReader();
+    r.onload = function(){ state.photo = r.result; state.photoSource="upload"; state.photoLoading=false; state.photoFailed=false; updatePhoto(); };
+    r.readAsDataURL(f);
+    e.target.value = "";
+  });
+
+  /* ---------- modale ---------- */
+  var curOverlay = null;
+  function closeModal(){ if(curOverlay){ curOverlay.remove(); curOverlay=null; } }
+  function overlay(title, inner){
+    closeModal();
+    var ov = el('<div class="scrim no-print"><div class="modal"><div class="modal-head"><h3>'+esc(title)+'</h3>'
+      + '<button class="x" data-close>'+svg(IC.x,18)+'</button></div>'+inner+'</div></div>');
+    ov.addEventListener("mousedown", function(e){ if(e.target===ov) closeModal(); });
+    ov.querySelector(".modal").addEventListener("mousedown", function(e){ e.stopPropagation(); });
+    var cl = ov.querySelectorAll("[data-close]");
+    for(var i=0;i<cl.length;i++) cl[i].addEventListener("click", closeModal);
+    document.body.appendChild(ov);
+    curOverlay = ov;
+    return ov;
+  }
+
+  function openName(){
+    var note = hasCreds()
+      ? "AI przygotuje ujednolicony opis, a aplikacja pobierze zdjęcie rośliny."
+      : "Bez ustawionego klucza/proxy aplikacja otworzy pustą, edytowalną etykietę — opis uzupełnisz ręcznie. Aby opis powstawał automatycznie, ustaw klucz lub proxy w ⚙.";
+    var ov = overlay("Jaka to roślina?",
+      '<div class="modal-body"><label>Nazwa rośliny</label>'
+      + '<input class="field" id="nameInput" placeholder="np. pomidor, Monstera dziurawa, hortensja…">'
+      + '<div class="modal-note">'+note+'</div>'
+      + '<div class="err" id="nameErr" style="display:none"></div></div>'
+      + '<div class="modal-foot"><button class="btn" data-close>Anuluj</button>'
+      + '<button class="btn primary" id="genBtn">'+(hasCreds()?"Generuj opis":"Utwórz etykietę")+' '+svg(IC.arrow,15)+'</button></div>');
+    var input = ov.querySelector("#nameInput"); input.focus();
+    input.addEventListener("keydown", function(e){ if(e.key==="Enter") go(); });
+    ov.querySelector("#genBtn").onclick = go;
+    function go(){
+      var name = input.value.trim();
+      if(!name){ showErr("Wpisz nazwę rośliny."); return; }
+      var btn = ov.querySelector("#genBtn"); btn.disabled = true; btn.innerHTML = svg(IC.loader,15,"spin")+" Generuję…";
+      generate(name, function(ok, msg){
+        if(!ok){ btn.disabled=false; btn.innerHTML=(hasCreds()?"Generuj opis":"Utwórz etykietę"); showErr(msg||"Nie udało się."); }
+      });
+    }
+    function showErr(m){ var e=ov.querySelector("#nameErr"); e.textContent=m; e.style.display=""; }
+  }
+
+  function openPrice(){
+    var ov = overlay("Jaka ma być cena?",
+      '<div class="modal-body"><label>Cena detaliczna</label>'
+      + '<div class="price-row"><input class="field" id="priceInput" inputmode="decimal" placeholder="np. 49,99" value="'+esc(state.price)+'"><div class="cur">zł</div></div>'
+      + '<div class="modal-note">Cena pojawi się po lewej stronie karty, pod opisem rośliny.</div></div>'
+      + '<div class="modal-foot"><button class="btn" data-close>Pomiń</button><button class="btn primary" id="savePrice">Zapisz cenę</button></div>');
+    var inp = ov.querySelector("#priceInput"); inp.focus();
+    inp.addEventListener("keydown", function(e){ if(e.key==="Enter") save(); });
+    ov.querySelector("#savePrice").onclick = save;
+    function save(){ state.price = inp.value.trim(); closeModal(); mount(); }
+  }
+
+  function openSettings(){
+    var ov = overlay("Ustawienia generowania opisu",
+      '<div class="modal-body">'
+      + '<div class="settings-field"><label>Adres backendu / proxy (zalecane)</label>'
+      +   '<input class="field" id="proxyInput" placeholder="https://twoja-apka.vercel.app/api/generate" value="'+esc(state.proxyUrl)+'"></div>'
+      + '<div class="or">albo</div>'
+      + '<div class="settings-field"><label>Klucz Anthropic (tylko lokalnie)</label>'
+      +   '<input class="field" id="keyInput" type="password" placeholder="sk-ant-…" value="'+esc(state.apiKey)+'">'
+      +   '<div class="warn">Klucz wpisany tutaj zostaje tylko w tej przeglądarce. Używaj go wyłącznie na komputerze firmowym / stronie niepublicznej — nigdy na publicznie dostępnej stronie. Na hosting użyj proxy.</div></div>'
+      + '</div>'
+      + '<div class="modal-foot"><button class="btn" data-close>Anuluj</button><button class="btn primary" id="saveSet">Zapisz</button></div>');
+    ov.querySelector("#saveSet").onclick = function(){
+      state.proxyUrl = ov.querySelector("#proxyInput").value.trim();
+      state.apiKey   = ov.querySelector("#keyInput").value.trim();
+      store("apsk_proxy", state.proxyUrl); store("apsk_key", state.apiKey);
+      closeModal();
+      if(!state.data) openName();
+    };
+  }
+
+  /* ---------- generowanie opisu ---------- */
+  function openBlank(name){
+    state.lastName = name;
+    state.data = {namePl:name, nameLat:"", intro:"", light:"", water:"", frost:"", height:"", care:""};
+    closeModal(); mount(); state.photo=null; loadWeb(name);
+    if(!state.price) openPrice();
+  }
+  function generate(name, cb){
+    state.lastName = name;
+    if(!state.proxyUrl && !state.apiKey){ openBlank(name); return; }
+    var req;
+    if(state.proxyUrl){
+      req = fetch(state.proxyUrl, {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({name:name, prompt:PROMPT(name)})});
+    } else {
+      req = fetch("https://api.anthropic.com/v1/messages", {method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":state.apiKey,
+          "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body: JSON.stringify({model:"claude-sonnet-4-6", max_tokens:1000, messages:[{role:"user", content:PROMPT(name)}]})});
+    }
+    req.then(function(r){ return r.json(); }).then(function(data){
+      var parsed = extractPlant(data);
+      state.data = parsed; closeModal(); mount(); state.photo=null; loadWeb(name);
+      if(!state.price) openPrice();
+    }).catch(function(){
+      if(cb) cb(false, "Nie udało się wygenerować opisu. Sprawdź ustawienia (proxy/klucz) lub uściślij nazwę rośliny.");
+    });
+  }
+
+  /* ---------- start ---------- */
+  try { mount(); openName(); }
+  catch(e){
+    root.innerHTML = '<pre style="white-space:pre-wrap;color:#ffb4b4;font-family:monospace;max-width:680px;margin:40px auto;padding:20px;background:#15241A;border-radius:10px">Błąd: '+((e&&e.stack)||e)+'</pre>';
+  }
+})();
 </script>
 </body>
 </html>
