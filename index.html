@@ -278,8 +278,12 @@ html,body{margin:0;padding:0;}
     if(data && typeof data==="object" && data.namePl) return data;
     var text="";
     if(data && data.content) text = data.content.map(function(b){return b.text||"";}).join("");
-    else text = (data && (data.text||data.completion)) || (typeof data==="string"?data:JSON.stringify(data));
-    return JSON.parse(String(text).replace(/```json|```/g,"").trim());
+    else if(typeof data==="string") text = data;
+    else text = (data && (data.text||data.completion)) || "";
+    text = String(text).replace(/```json|```/g,"").trim();
+    var s=text.indexOf("{"), e=text.lastIndexOf("}");
+    if(s>=0 && e>s) text = text.slice(s, e+1);
+    return JSON.parse(text);
   }
 
   /* ---------- render ---------- */
@@ -504,12 +508,25 @@ html,body{margin:0;padding:0;}
           "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
         body: JSON.stringify({model:"claude-sonnet-4-6", max_tokens:1000, messages:[{role:"user", content:PROMPT(name)}]})});
     }
-    req.then(function(r){ return r.json(); }).then(function(data){
+    req.then(function(r){
+      return r.text().then(function(t){
+        var d; try{ d=JSON.parse(t); }catch(e){ d=t; }
+        return { status:r.status, data:d };
+      });
+    }).then(function(resp){
+      var data = resp.data;
+      if(data && data.error){
+        var m = (typeof data.error==="string") ? data.error : (data.error.message || JSON.stringify(data.error));
+        throw new Error(m);
+      }
+      if(resp.status >= 400){
+        throw new Error("HTTP "+resp.status+((typeof data==="string") ? (" — "+data.slice(0,200)) : ""));
+      }
       var parsed = extractPlant(data);
       state.data = parsed; closeModal(); mount(); state.photo=null; loadWeb(name);
       if(!state.price) openPrice();
-    }).catch(function(){
-      if(cb) cb(false, "Nie udało się wygenerować opisu. Sprawdź ustawienia (proxy/klucz) lub uściślij nazwę rośliny.");
+    }).catch(function(err){
+      if(cb) cb(false, "Nie udało się wygenerować opisu: " + ((err && err.message) ? err.message : "sprawdź proxy / klucz / billing lub uściślij nazwę rośliny."));
     });
   }
 
