@@ -177,6 +177,12 @@ html,body{margin:0;padding:0;}
 .warn{background:#fff6e6;color:#7a5a16;border:1px solid #e6d3a6;border-radius:9px;padding:10px 12px;font-size:12px;line-height:1.5;margin-top:4px;}
 .or{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7E8E7B;text-align:center;margin:10px 0;}
 .boot{color:#9FB39C;font-family:system-ui,sans-serif;padding:48px;text-align:center;}
+.notice{display:flex;align-items:center;gap:10px;max-width:1000px;margin:0 auto 16px;padding:11px 14px;border-radius:10px;font-size:13px;line-height:1.45;}
+.notice span{flex:1;}
+.notice-warn{background:#fff6e6;color:#7a5a16;border:1px solid #e6d3a6;}
+.notice-err{background:#fbeaea;color:#8a2b2b;border:1px solid #e7c4c4;}
+.notice-x{background:none;border:none;cursor:pointer;color:inherit;opacity:.65;padding:2px;display:flex;}
+.notice-x:hover{opacity:1;}
 </style>
 </head>
 <body>
@@ -207,20 +213,30 @@ html,body{margin:0;padding:0;}
     wand:'<path d="M4 20L15 9"/><path d="M13 7l4 4"/><path d="M18 3l.6 1.6L20 5l-1.4.6L18 7l-.6-1.4L16 5l1.4-.6z"/>',
     globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/>',
     cog:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.6 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.6H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8 1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>',
-    loader:'<path d="M21 12a9 9 0 1 1-6.2-8.5"/>'
+    loader:'<path d="M21 12a9 9 0 1 1-6.2-8.5"/>',
+    warn:'<path d="M12 3l9 16H3z"/><path d="M12 10v4M12 16.6v.4"/>'
   };
 
   /* ---------- stan ---------- */
   function load(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v; }catch(e){ return d; } }
   function store(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
   var state = {
-    data:null, price:"", photo:null, photoLoading:false, photoSource:null, photoFailed:false,
+    data:null, price:"", photo:null, photoLoading:false, photoSource:null, photoFailed:false, notice:null,
     lastName:"", proxyUrl: load("apsk_proxy",""), apiKey: load("apsk_key","")
   };
   function hasCreds(){ return !!(state.proxyUrl || state.apiKey); }
 
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
   function el(html){ var t=document.createElement("template"); t.innerHTML=String(html).trim(); return t.content.firstChild; }
+  function formatPrice(raw){
+    if(raw==null) return "";
+    var s = String(raw).trim();
+    if(!s || s==="—") return "";
+    var num = s.replace(/\s/g,"").replace(",", ".").replace(/[^0-9.\-]/g,"");
+    var v = parseFloat(num);
+    if(isNaN(v)) return s;            // nie da się odczytać liczby — zostaw jak wpisano
+    return v.toFixed(2).replace(".", ",");   // 2 miejsca, przecinek po polsku
+  }
 
   var CARE = [
     {key:"light", label:"Stanowisko",     icon:IC.sun},
@@ -325,7 +341,7 @@ html,body{margin:0;padding:0;}
       +   '<div class="intro" contenteditable data-k="intro">'+esc(d.intro||"")+'</div>'
       +   '<div class="care">'+care+'</div>'
       +   '<div class="price-tag"><span class="cap">Cena</span><span class="val">'
-      +     '<span class="num" contenteditable data-price="1">'+esc(state.price||"—")+'</span><span class="cur">zł</span></span></div>'
+      +     '<span class="num" contenteditable data-price="1">'+(state.price?esc(formatPrice(state.price)):"—")+'</span><span class="cur">zł</span></span></div>'
       + '</div><div class="right" id="photo"></div></div>'
       + '<div class="card-foot"><span class="tag">Twój ogród zasługuje na najlepsze</span>'
       +   '<span class="care-note" data-k="care" contenteditable>'+esc(d.care||"")+'</span></div>'
@@ -333,9 +349,16 @@ html,body{margin:0;padding:0;}
       + '<div class="hint no-print">'+svg(IC.pencil,13)+' Kliknij dowolny tekst na karcie, aby go poprawić · zdjęcie zmienisz przyciskami „Sieć” / „Generuj AI” / „Wgraj”.</div>';
   }
 
+  function noticeHTML(){
+    if(!state.notice) return "";
+    var cls = state.notice.type==="err" ? "notice-err" : "notice-warn";
+    return '<div class="notice '+cls+' no-print">'+svg(IC.warn,16)+'<span>'+esc(state.notice.text)+'</span>'
+      + '<button class="notice-x" data-notice-close>'+svg(IC.x,14)+'</button></div>';
+  }
   function mount(){
-    root.innerHTML = '<div class="app"><div class="wrap">' + topBar() + (state.data ? cardHTML() : startHTML()) + '</div></div>';
+    root.innerHTML = '<div class="app"><div class="wrap">' + topBar() + noticeHTML() + (state.data ? cardHTML() : startHTML()) + '</div></div>';
     wireTop();
+    var nc = root.querySelector("[data-notice-close]"); if(nc) nc.onclick = function(){ state.notice=null; mount(); };
     if(state.data){ wireCard(); updatePhoto(); }
   }
 
@@ -361,7 +384,7 @@ html,body{margin:0;padding:0;}
       (function(n){ n.addEventListener("blur", function(){ if(state.data) state.data[n.getAttribute("data-k")] = n.textContent; }); })(eds[i]);
     }
     var p = root.querySelector("[data-price]");
-    if(p) p.addEventListener("blur", function(){ state.price = p.textContent; });
+    if(p) p.addEventListener("blur", function(){ state.price = formatPrice(p.textContent); p.textContent = state.price || "—"; });
   }
 
   function updatePhoto(){
@@ -465,7 +488,7 @@ html,body{margin:0;padding:0;}
     var inp = ov.querySelector("#priceInput"); inp.focus();
     inp.addEventListener("keydown", function(e){ if(e.key==="Enter") save(); });
     ov.querySelector("#savePrice").onclick = save;
-    function save(){ state.price = inp.value.trim(); closeModal(); mount(); }
+    function save(){ state.price = formatPrice(inp.value); closeModal(); mount(); }
   }
 
   function openSettings(){
@@ -497,7 +520,11 @@ html,body{margin:0;padding:0;}
   }
   function generate(name, cb){
     state.lastName = name;
-    if(!state.proxyUrl && !state.apiKey){ openBlank(name); return; }
+    if(!state.proxyUrl && !state.apiKey){
+      state.notice = {type:"warn", text:"Opis nie został wygenerowany automatycznie — nie ustawiono klucza ani adresu backendu (proxy). Ustaw je w ⚙ (albo dodaj ANTHROPIC_API_KEY w Vercel i zrób redeploy). Pola możesz też wypełnić ręcznie."};
+      openBlank(name);
+      return;
+    }
     var req;
     if(state.proxyUrl){
       req = fetch(state.proxyUrl, {method:"POST", headers:{"Content-Type":"application/json"},
@@ -523,10 +550,14 @@ html,body{margin:0;padding:0;}
         throw new Error("HTTP "+resp.status+((typeof data==="string") ? (" — "+data.slice(0,200)) : ""));
       }
       var parsed = extractPlant(data);
+      state.notice = null;
       state.data = parsed; closeModal(); mount(); state.photo=null; loadWeb(name);
       if(!state.price) openPrice();
     }).catch(function(err){
-      if(cb) cb(false, "Nie udało się wygenerować opisu: " + ((err && err.message) ? err.message : "sprawdź proxy / klucz / billing lub uściślij nazwę rośliny."));
+      var msg = (err && err.message) ? err.message : "sprawdź proxy / klucz / billing lub uściślij nazwę rośliny.";
+      state.notice = {type:"err", text:"Opis nie został wygenerowany. Powód: " + msg};
+      if(cb) cb(false, msg);
+      mount();
     });
   }
 
